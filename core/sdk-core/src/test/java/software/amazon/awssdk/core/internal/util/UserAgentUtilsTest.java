@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Arrays;
 import org.junit.Test;
 import software.amazon.awssdk.core.internal.util.UserAgentUtils;
+import software.amazon.awssdk.utils.JavaSystemSetting;
 
 public class UserAgentUtilsTest {
 
@@ -29,6 +30,20 @@ public class UserAgentUtilsTest {
         String userAgent = UserAgentUtils.userAgent();
         assertNotNull(userAgent);
         Arrays.stream(userAgent.split(" ")).forEach(str -> assertThat(isValidInput(str)).isTrue());
+    }
+
+    @Test
+    public void userAgent_HasVendor() {
+        System.getProperty(JavaSystemSetting.JAVA_VENDOR.property(), "finks");
+        String userAgent = UserAgentUtils.userAgent();
+        System.clearProperty(JavaSystemSetting.JAVA_VENDOR.property());
+        assertThat(userAgent.contains("vendor/finks"));
+    }
+
+    @Test
+    public void userAgent_HasUnknownVendor() {
+        String userAgent = UserAgentUtils.userAgent();
+        assertThat(userAgent.contains("vendor/UNKNOWN"));
     }
 
     private boolean isValidInput(String input) {
